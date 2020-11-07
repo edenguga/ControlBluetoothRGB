@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
         //Botón Verde para encender y apagar el color verde del LED RGB
         btnVerde.setOnClickListener(new View.OnClickListener() {
             int ctrlEncendido = 0;
