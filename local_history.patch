@@ -1,0 +1,119 @@
+Index: app/src/main/java/com/example/control_bluetooth/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/control_bluetooth/MainActivity.java	(date 1604955918865)
++++ app/src/main/java/com/example/control_bluetooth/MainActivity.java	(date 1604955918865)
+@@ -21,39 +21,46 @@
+ import java.io.OutputStream;
+ import java.util.UUID;
+ 
+-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
++public class MainActivity<onRestart> extends AppCompatActivity {
+ 
+     BluetoothSocket btSocket;
+     private static final int REQUEST_CODE = 1269;
+     String DIR_MAC_BT = "";
+     private MainActivity.ConnectAsyncTask connectAsyncTask;
++    Button btnConectBT = (Button) findViewById(R.id.btn_ConectarBT);
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_main);
+-        final Button btnRojo = (Button) findViewById(R.id.btn_Rojo);
++        Button btnRojo = (Button) findViewById(R.id.btn_Rojo);
+         Button btnVerde = (Button) findViewById(R.id.btn_Verde);
+         Button btnAzul = (Button) findViewById(R.id.btn_Azul);
+         Spinner spinnerRojo = (Spinner) findViewById(R.id.spinnerRojo);
+         Spinner spinnerVerde = (Spinner) findViewById(R.id.spinnerVerde);
+         Spinner spinnerAzul = (Spinner) findViewById(R.id.spinnerAzul);
+-        Button btnConectBT = (Button) findViewById(R.id.btn_ConectarBT);
+-        btnConectBT.setOnClickListener(this);
++
++        // Desactivar Botones que no se pueden utilizar antes de conectar el bluetooth
++        desActivarVistas(btnRojo);
++        desActivarVistas(btnVerde);
++        desActivarVistas(btnAzul);
++        desActivarVistas(spinnerRojo);
++        desActivarVistas(spinnerVerde);
++        desActivarVistas(spinnerAzul);
++
++
++        //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
++
++
++
++        });
++
++
++
+ 
+-            //Instanciar la Tarea Asincrona (AsyncTask) para conectar con el Bluetooth
+-            connectAsyncTask = new ConnectAsyncTask();
++        //Instanciar la Tarea Asincrona (AsyncTask) para conectar con el Bluetooth
++        connectAsyncTask = new ConnectAsyncTask();
+ 
+-        /*//Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
+-            btnConectBT.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View view) {
+-                Intent intent = new Intent(view.getContext(), ControlBT.class);
+-                startActivityForResult(intent, REQUEST_CODE);
+-
+-            }
+-        });*/
+-
+         //Botón Rojo para encender y apagar el color rojo del LED RGB
+         btnRojo.setOnClickListener(new View.OnClickListener() {
+             int ctrlEncendido = 0;
+@@ -158,6 +165,11 @@
+ 
+     }
+ 
++    public void onClick(@org.jetbrains.annotations.NotNull View v) {
++        Intent intent = new Intent(v.getContext(), ControlBT.class);
++        startActivityForResult(intent, REQUEST_CODE);
++    }
++
+     //Evaluar el resultado y proceder de acuerdo con lo recibido
+     @Override
+     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+@@ -184,11 +196,6 @@
+         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+     }
+ 
+-    @Override
+-    public void onClick(View v) {
+-        ProcesadorListener(v.getId());
+-    }
+-
+     //Ejecución de Tarea Asincrona para conectar con el Bluetooth
+     private class ConnectAsyncTask extends AsyncTask<BluetoothDevice, Integer, BluetoothSocket> {
+ 
+@@ -230,19 +237,13 @@
+ 
+         }
+ 
+-    public void ProcesadorListener(int evt){
+-
+-        switch (evt){
+-
+-            case R.id.btn_ConectarBT:       //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
+-                Intent intent = new Intent(this, ControlBT.class);
+-                startActivityForResult(intent, REQUEST_CODE);
+-
+-                break;
+-
++    private void desActivarVistas(View view){
++            view.setEnabled(false);
+         }
++
++    private void ActivarVistas(View view){
++        view.setEnabled(true);
+     }
+-
+ }
+ 
+ /*

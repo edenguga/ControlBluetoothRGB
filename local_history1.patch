@@ -1,0 +1,84 @@
+Index: app/src/main/java/com/example/control_bluetooth/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/control_bluetooth/MainActivity.java	(date 1604956015110)
++++ app/src/main/java/com/example/control_bluetooth/MainActivity.java	(date 1604956015110)
+@@ -21,7 +21,7 @@
+ import java.io.OutputStream;
+ import java.util.UUID;
+ 
+-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
++public class MainActivity extends AppCompatActivity {
+ 
+     BluetoothSocket btSocket;
+     private static final int REQUEST_CODE = 1269;
+@@ -32,27 +32,26 @@
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_main);
+-        final Button btnRojo = (Button) findViewById(R.id.btn_Rojo);
++        Button btnRojo = (Button) findViewById(R.id.btn_Rojo);
+         Button btnVerde = (Button) findViewById(R.id.btn_Verde);
+         Button btnAzul = (Button) findViewById(R.id.btn_Azul);
+         Spinner spinnerRojo = (Spinner) findViewById(R.id.spinnerRojo);
+         Spinner spinnerVerde = (Spinner) findViewById(R.id.spinnerVerde);
+         Spinner spinnerAzul = (Spinner) findViewById(R.id.spinnerAzul);
+-        Button btnConectBT = (Button) findViewById(R.id.btn_ConectarBT);
+-        btnConectBT.setOnClickListener(this);
+ 
+-            //Instanciar la Tarea Asincrona (AsyncTask) para conectar con el Bluetooth
+-            connectAsyncTask = new ConnectAsyncTask();
++        //Instanciar la Tarea Asincrona (AsyncTask) para conectar con el Bluetooth
++        connectAsyncTask = new ConnectAsyncTask();
+ 
+-        /*//Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
+-            btnConectBT.setOnClickListener(new View.OnClickListener() {
++        //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
++        Button btnConectBT = (Button) findViewById(R.id.btn_ConectarBT);
++        btnConectBT.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View view) {
+                 Intent intent = new Intent(view.getContext(), ControlBT.class);
+                 startActivityForResult(intent, REQUEST_CODE);
+ 
+             }
+-        });*/
++        });
+ 
+         //Botón Rojo para encender y apagar el color rojo del LED RGB
+         btnRojo.setOnClickListener(new View.OnClickListener() {
+@@ -184,11 +183,6 @@
+         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+     }
+ 
+-    @Override
+-    public void onClick(View v) {
+-        ProcesadorListener(v.getId());
+-    }
+-
+     //Ejecución de Tarea Asincrona para conectar con el Bluetooth
+     private class ConnectAsyncTask extends AsyncTask<BluetoothDevice, Integer, BluetoothSocket> {
+ 
+@@ -229,20 +223,6 @@
+             }
+ 
+         }
+-
+-    public void ProcesadorListener(int evt){
+-
+-        switch (evt){
+-
+-            case R.id.btn_ConectarBT:       //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
+-                Intent intent = new Intent(this, ControlBT.class);
+-                startActivityForResult(intent, REQUEST_CODE);
+-
+-                break;
+-
+-        }
+-    }
+-
+ }
+ 
+ /*

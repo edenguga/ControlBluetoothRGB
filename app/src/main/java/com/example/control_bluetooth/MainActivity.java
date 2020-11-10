@@ -24,33 +24,31 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
 
     BluetoothSocket btSocket;
+    Boolean ConexionBT = false;
     private static final int REQUEST_CODE = 1269;
     String DIR_MAC_BT = "";
-    private MainActivity.ConnectAsyncTask connectAsyncTask;
+    ConnectAsyncTask conectarBT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button btnRojo = (Button) findViewById(R.id.btn_Rojo);
-        Button btnVerde = (Button) findViewById(R.id.btn_Verde);
-        Button btnAzul = (Button) findViewById(R.id.btn_Azul);
-        Spinner spinnerRojo = (Spinner) findViewById(R.id.spinnerRojo);
-        Spinner spinnerVerde = (Spinner) findViewById(R.id.spinnerVerde);
-        Spinner spinnerAzul = (Spinner) findViewById(R.id.spinnerAzul);
+        MainActivity.ConnectAsyncTask connectAsyncTask;
+        Button btnRojo = findViewById(R.id.btn_Rojo);
+        Button btnVerde = findViewById(R.id.btn_Verde);
+        Button btnAzul = findViewById(R.id.btn_Azul);
+        Spinner spinnerRojo = findViewById(R.id.spinnerRojo);
+        Spinner spinnerVerde = findViewById(R.id.spinnerVerde);
+        Spinner spinnerAzul = findViewById(R.id.spinnerAzul);
 
         //Instanciar la Tarea Asincrona (AsyncTask) para conectar con el Bluetooth
-        connectAsyncTask = new ConnectAsyncTask();
+        conectarBT = new ConnectAsyncTask();
 
         //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
-        Button btnConectBT = (Button) findViewById(R.id.btn_ConectarBT);
-        btnConectBT.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), ControlBT.class);
-                startActivityForResult(intent, REQUEST_CODE);
-
-            }
+        Button btnConectBT = findViewById(R.id.btn_ConectarBT);
+        btnConectBT.setOnClickListener(view -> {
+            Intent intent = new Intent(view.getContext(), ControlBT.class);
+            startActivityForResult(intent, REQUEST_CODE);
         });
 
         //Botón Rojo para encender y apagar el color rojo del LED RGB
@@ -109,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
                 if (position == 0) {
+                    showToast("Seleccione un valor");
                 } else {
                     datos = ("B" + spinnerRojo.getItemAtPosition(position));
                     EnviarDatos(datos);
@@ -126,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
                 if (position == 0) {
+                    showToast("Seleccione un valor");
                 } else {
                     datos = ("C" + spinnerVerde.getItemAtPosition(position));
                     EnviarDatos(datos);
@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
                 if (position == 0) {
+                    showToast("Seleccione un valor");
                 } else {
                     datos = ("A" + spinnerAzul.getItemAtPosition(position));
                     EnviarDatos(datos);
@@ -169,8 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 //Las dos lineas siguientes permiten convertir la MAC que está en String a Bluetooth Device
                 BluetoothManager bluetoothManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
                 BluetoothDevice mBluetoothDevice = bluetoothManager.getAdapter() .getRemoteDevice(DIR_MAC_BT);
-
-                connectAsyncTask.execute(mBluetoothDevice);
+                conectarBT.execute(mBluetoothDevice);
 
             } else if(resultCode == RESULT_CANCELED){
                 showToast("Operación Cancelada por el usuario");
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Ejecución de Tarea Asincrona para conectar con el Bluetooth
-    private class ConnectAsyncTask extends AsyncTask<BluetoothDevice, Integer, BluetoothSocket> {
+    private class ConnectAsyncTask extends AsyncTask <BluetoothDevice, Integer, BluetoothSocket> {
 
         private BluetoothSocket mmSocket;
         private BluetoothDevice mmDevice;
@@ -196,34 +196,48 @@ public class MainActivity extends AppCompatActivity {
                 String mmUUID = "00001101-0000-1000-8000-00805F9B34FB";
                 mmSocket = mmDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString(mmUUID));
                 mmSocket.connect();
+                ConexionBT = true;
+
             } catch (Exception e) {
+                ConexionBT = false;
             }
+
             return mmSocket;
         }
 
         @Override
         protected void onPostExecute(BluetoothSocket result) {
+            if(!ConexionBT){
+                showToast("Error en la conexión, dispositivo remoto no disponible...");
+            }else {
+                showToast("Dispositivo conectado...");
+                ConexionBT = true;
+            }
             btSocket = result;
         }
     }
 
     //Método para enviar datos por Bluetooth en este caso a un Arduino o STM y controlar luces LED RGB
-        public void EnviarDatos (String dato){
+        public void EnviarDatos (String dato) {
 
-            OutputStream mmOutStream = null;
+            OutputStream mmOutStream;
 
-            try {
-                if(btSocket.isConnected()){
+            if (ConexionBT) try {
+                if (btSocket.isConnected()) {
                     mmOutStream = btSocket.getOutputStream();
-                    mmOutStream.write(new String(dato).getBytes());
+                    mmOutStream.write(dato.getBytes());
                 }
 
             } catch (IOException e) {
-
+                Log.v("EEGG", "Error no hay conexión");
             }
-
         }
+
 }
+
+
+//
+// EEGG: Log.v("EEGG", "Aquí se coloca el mensaje o la variable o ambos");
 
 /*
     //Crea una tarea asíncrona en segundo plano (AsynTask) sin parámetros para conectarse al dispositivo Bluetooth
@@ -282,11 +296,10 @@ public class MainActivity extends AppCompatActivity {
             {
                 Toast.makeText(getApplicationContext(),"Conectado",Toast.LENGTH_SHORT).show();
                 BTconectado=true;
-    //Activa el Thread en segundo plano para la lectura de
-    //EEGG            bluetooth HiloLectura = new HiloConexion();
-    //EEGG            HiloLectura.start();
+    //Activa el Thread en segundo plano para la lectura de bluetooth HiloLectura = new HiloConexion();
+                HiloLectura.start();
             }
-    //EEGG        progresoind.dismiss(); //Finaliza el indicador de la rueda de progreso
+            progresoind.dismiss(); //Finaliza el indicador de la rueda de progreso
         }
     }
 
