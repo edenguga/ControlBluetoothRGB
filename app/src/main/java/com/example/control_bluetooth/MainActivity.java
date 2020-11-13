@@ -1,5 +1,6 @@
 package com.example.control_bluetooth;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
@@ -40,15 +41,28 @@ public class MainActivity extends AppCompatActivity {
         Spinner spinnerRojo = findViewById(R.id.spinnerRojo);
         Spinner spinnerVerde = findViewById(R.id.spinnerVerde);
         Spinner spinnerAzul = findViewById(R.id.spinnerAzul);
+        Button btnConectBT = findViewById(R.id.btn_ConectarBT);
+        btnConectBT.setText(R.string.btnConBT);
 
         //Instanciar la Tarea Asincrona (AsyncTask) para conectar con el Bluetooth
         conectarBT = new ConnectAsyncTask();
 
+        //adaptador de Bluetooth
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
-        Button btnConectBT = findViewById(R.id.btn_ConectarBT);
         btnConectBT.setOnClickListener(view -> {
-            Intent intent = new Intent(view.getContext(), ControlBT.class);
-            startActivityForResult(intent, REQUEST_CODE);
+          if (!ConexionBT) {
+              Intent intent = new Intent(view.getContext(), ControlBT.class);
+              startActivityForResult(intent, REQUEST_CODE);
+              btnConectBT.setText(R.string.btnConBT2);
+          }
+            if (ConexionBT){
+                showToast("Apagando El Bluetooth");
+                mBluetoothAdapter.disable();
+                btnConectBT.setText(R.string.btnConBT);
+                ConexionBT = false;
+            }
         });
 
         //Botón Rojo para encender y apagar el color rojo del LED RGB
@@ -106,12 +120,8 @@ public class MainActivity extends AppCompatActivity {
             String datos;
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
-                if (position == 0) {
-                    showToast("Seleccione un valor");
-                } else {
                     datos = ("B" + spinnerRojo.getItemAtPosition(position));
                     EnviarDatos(datos);
-                }
             }
 
             @Override
@@ -124,12 +134,8 @@ public class MainActivity extends AppCompatActivity {
             String datos;
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
-                if (position == 0) {
-                    showToast("Seleccione un valor");
-                } else {
-                    datos = ("C" + spinnerVerde.getItemAtPosition(position));
-                    EnviarDatos(datos);
-                }
+                datos = ("C" + spinnerVerde.getItemAtPosition(position));
+                EnviarDatos(datos);
             }
 
             @Override
@@ -142,12 +148,8 @@ public class MainActivity extends AppCompatActivity {
             String datos;
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
-                if (position == 0) {
-                    showToast("Seleccione un valor");
-                } else {
-                    datos = ("A" + spinnerAzul.getItemAtPosition(position));
-                    EnviarDatos(datos);
-                }
+                datos = ("A" + spinnerAzul.getItemAtPosition(position));
+                EnviarDatos(datos);
             }
 
             @Override
@@ -232,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.v("EEGG", "Error no hay conexión");
             }
         }
-
 }
 
 
