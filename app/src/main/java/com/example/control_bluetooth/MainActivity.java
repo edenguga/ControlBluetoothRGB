@@ -11,13 +11,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
@@ -26,40 +24,46 @@ public class MainActivity extends AppCompatActivity {
 
     BluetoothSocket btSocket;
     Boolean ConexionBT = false;
-    private static final int REQUEST_CODE = 1269;
+    private static int REQUEST_CODE = 1269;
     String DIR_MAC_BT = "";
-    ConnectAsyncTask conectarBT;
+    ProgressBar pBar;
+    Button btnConectBT;
+    ConectarBT conectarBT;
+    BluetoothAdapter mBluetoothAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MainActivity.ConnectAsyncTask connectAsyncTask;
         Button btnRojo = findViewById(R.id.btn_Rojo);
         Button btnVerde = findViewById(R.id.btn_Verde);
         Button btnAzul = findViewById(R.id.btn_Azul);
         Spinner spinnerRojo = findViewById(R.id.spinnerRojo);
         Spinner spinnerVerde = findViewById(R.id.spinnerVerde);
         Spinner spinnerAzul = findViewById(R.id.spinnerAzul);
-        Button btnConectBT = findViewById(R.id.btn_ConectarBT);
-        btnConectBT.setText(R.string.btnConBT);
+        btnConectBT = findViewById(R.id.btn_ConectarBT);
+        pBar = findViewById(R.id.progressBar);
 
         //Instanciar la Tarea Asincrona (AsyncTask) para conectar con el Bluetooth
-        conectarBT = new ConnectAsyncTask();
+        conectarBT = new ConectarBT();
 
         //adaptador de Bluetooth
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
         btnConectBT.setOnClickListener(view -> {
-          if (!ConexionBT) {
+            if (!ConexionBT) {
               Intent intent = new Intent(view.getContext(), ControlBT.class);
               startActivityForResult(intent, REQUEST_CODE);
-              btnConectBT.setText(R.string.btnConBT2);
           }
             if (ConexionBT){
                 showToast("Apagando El Bluetooth");
-                mBluetoothAdapter.disable();
+                try {
+                    btSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //mBluetoothAdapter.disable();
                 btnConectBT.setText(R.string.btnConBT);
                 ConexionBT = false;
             }
@@ -166,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_CODE){
             if(resultCode == RESULT_OK){
-
                 DIR_MAC_BT = data.getStringExtra("MESSAGE_MAC");
 
                 //Las dos lineas siguientes permiten convertir la MAC que está en String a Bluetooth Device
@@ -186,14 +189,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Ejecución de Tarea Asincrona para conectar con el Bluetooth
-    private class ConnectAsyncTask extends AsyncTask <BluetoothDevice, Integer, BluetoothSocket> {
+    private class ConectarBT extends AsyncTask <BluetoothDevice, Integer, BluetoothSocket> {
 
         private BluetoothSocket mmSocket;
-        private BluetoothDevice mmDevice;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pBar.setVisibility(View.VISIBLE);
+        }
 
         @Override
         protected BluetoothSocket doInBackground(BluetoothDevice... device) {
-            mmDevice = device[0];
+            BluetoothDevice mmDevice = device[0];
             try {
                 String mmUUID = "00001101-0000-1000-8000-00805F9B34FB";
                 mmSocket = mmDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString(mmUUID));
@@ -209,11 +217,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(BluetoothSocket result) {
+            pBar.setVisibility(View.INVISIBLE);
             if(!ConexionBT){
                 showToast("Error en la conexión, dispositivo remoto no disponible...");
+                btnConectBT.setText(R.string.btnConBT);
+                mBluetoothAdapter.disable();
             }else {
                 showToast("Dispositivo conectado...");
                 ConexionBT = true;
+                btnConectBT.setText(R.string.btnConBT2);
             }
             btSocket = result;
         }
@@ -234,6 +246,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.v("EEGG", "Error no hay conexión");
             }
         }
+
+    @Override
+    protected void onResume() {
+        REQUEST_CODE = (int) Math.floor(Math.random()*20);
+        Log.v("EEGG", "" + REQUEST_CODE);
+        super.onResume();
+    }
 }
 
 
