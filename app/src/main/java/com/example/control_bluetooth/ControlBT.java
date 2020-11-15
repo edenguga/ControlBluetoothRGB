@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -121,7 +122,6 @@ public class ControlBT extends AppCompatActivity {
                 finish();
             }
         });
-
     }
 
     //Evaluar el resultado del encendido del Bluetooth y cambiar la imagen off / on

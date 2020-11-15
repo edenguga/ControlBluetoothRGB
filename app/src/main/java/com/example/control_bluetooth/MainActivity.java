@@ -23,8 +23,8 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
 
     BluetoothSocket btSocket;
-    Boolean ConexionBT = false;
-    private static int REQUEST_CODE = 1269;
+    String ConexionBT = "NO CONECTADO";
+    private static final int REQUEST_CODE = 1269;
     String DIR_MAC_BT = "";
     ProgressBar pBar;
     Button btnConectBT;
@@ -52,20 +52,22 @@ public class MainActivity extends AppCompatActivity {
 
         //Lanzar el Activity control_bt con Result para que nos devuelva la MAC del Bluetooth
         btnConectBT.setOnClickListener(view -> {
-            if (!ConexionBT) {
+            if (ConexionBT.equals("NO CONECTADO")) {
               Intent intent = new Intent(view.getContext(), ControlBT.class);
               startActivityForResult(intent, REQUEST_CODE);
           }
-            if (ConexionBT){
+            else if (ConexionBT.equals("CONECTADO")){
                 showToast("Apagando El Bluetooth");
                 try {
                     btSocket.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                //mBluetoothAdapter.disable();
-                btnConectBT.setText(R.string.btnConBT);
-                ConexionBT = false;
+                mBluetoothAdapter.disable();
+                btnConectBT.setText(R.string.btnConBT3);
+                ConexionBT = null;
+            }else{
+                System.exit(0);
             }
         });
 
@@ -206,10 +208,10 @@ public class MainActivity extends AppCompatActivity {
                 String mmUUID = "00001101-0000-1000-8000-00805F9B34FB";
                 mmSocket = mmDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString(mmUUID));
                 mmSocket.connect();
-                ConexionBT = true;
+                ConexionBT = "CONECTADO";
 
             } catch (Exception e) {
-                ConexionBT = false;
+                ConexionBT = "NO CONECTADO";
             }
 
             return mmSocket;
@@ -218,13 +220,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(BluetoothSocket result) {
             pBar.setVisibility(View.INVISIBLE);
-            if(!ConexionBT){
+            if(ConexionBT.equals("NO CONECTADO")){
                 showToast("Error en la conexión, dispositivo remoto no disponible...");
-                btnConectBT.setText(R.string.btnConBT);
+                btnConectBT.setText(R.string.btnConBT3);
                 mBluetoothAdapter.disable();
+                ConexionBT = "";
             }else {
                 showToast("Dispositivo conectado...");
-                ConexionBT = true;
+                ConexionBT = "CONECTADO";
                 btnConectBT.setText(R.string.btnConBT2);
             }
             btSocket = result;
@@ -236,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
 
             OutputStream mmOutStream;
 
-            if (ConexionBT) try {
+            if (ConexionBT.equals("CONECTADO")) try {
                 if (btSocket.isConnected()) {
                     mmOutStream = btSocket.getOutputStream();
                     mmOutStream.write(dato.getBytes());
@@ -246,13 +249,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.v("EEGG", "Error no hay conexión");
             }
         }
-
-    @Override
-    protected void onResume() {
-        REQUEST_CODE = (int) Math.floor(Math.random()*20);
-        Log.v("EEGG", "" + REQUEST_CODE);
-        super.onResume();
-    }
 }
 
 
