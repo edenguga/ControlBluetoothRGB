@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 mBluetoothAdapter.disable();
                 btnConectBT.setText(R.string.btnConBT3);
-                ConexionBT = null;
+                ConexionBT = "";
             }else{
                 System.exit(0);
             }
@@ -73,6 +73,40 @@ public class MainActivity extends AppCompatActivity {
 
         //Botón Rojo para encender y apagar el color rojo del LED RGB
         btnRojo.setOnClickListener(new View.OnClickListener() {
+            int ctrlEncendido = 0;
+            @Override
+            public void onClick(View view) {
+                if (ctrlEncendido == 0) {
+                    EnviarDatos("R255");
+                    ctrlEncendido = 1;
+
+                }
+                else if (ctrlEncendido == 1) {
+                    EnviarDatos("R0");
+                    ctrlEncendido = 0;
+                }
+            }
+        });
+
+        //Botón Verde para encender y apagar el color verde del LED RGB
+        btnVerde.setOnClickListener(new View.OnClickListener() {
+            int ctrlEncendido = 0;
+            @Override
+            public void onClick(View view) {
+                if (ctrlEncendido == 0) {
+                    EnviarDatos("G255");
+                    ctrlEncendido = 1;
+
+                }
+                else if (ctrlEncendido == 1) {
+                    EnviarDatos("G0");
+                    ctrlEncendido = 0;
+                }
+            }
+        });
+
+        //Botón Azul para encender y apagar el color azul del LED RGB
+        btnAzul.setOnClickListener(new View.OnClickListener() {
             int ctrlEncendido = 0;
             @Override
             public void onClick(View view) {
@@ -88,45 +122,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //Botón Verde para encender y apagar el color verde del LED RGB
-        btnVerde.setOnClickListener(new View.OnClickListener() {
-            int ctrlEncendido = 0;
-            @Override
-            public void onClick(View view) {
-                if (ctrlEncendido == 0) {
-                    EnviarDatos("C255");
-                    ctrlEncendido = 1;
-
-                }
-                else if (ctrlEncendido == 1) {
-                    EnviarDatos("C0");
-                    ctrlEncendido = 0;
-                }
-            }
-        });
-
-        //Botón Azul para encender y apagar el color azul del LED RGB
-        btnAzul.setOnClickListener(new View.OnClickListener() {
-            int ctrlEncendido = 0;
-            @Override
-            public void onClick(View view) {
-                if (ctrlEncendido == 0) {
-                    EnviarDatos("A255");
-                    ctrlEncendido = 1;
-
-                }
-                else if (ctrlEncendido == 1) {
-                    EnviarDatos("A0");
-                    ctrlEncendido = 0;
-                }
-            }
-        });
-
         spinnerRojo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             String datos;
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
-                    datos = ("B" + spinnerRojo.getItemAtPosition(position));
+                    datos = ("R" + spinnerRojo.getItemAtPosition(position));
                     EnviarDatos(datos);
             }
 
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             String datos;
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
-                datos = ("C" + spinnerVerde.getItemAtPosition(position));
+                datos = ("G" + spinnerVerde.getItemAtPosition(position));
                 EnviarDatos(datos);
             }
 
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             String datos;
             @Override
             public void onItemSelected(AdapterView<?> adapter, View view, int position, long id) {
-                datos = ("A" + spinnerAzul.getItemAtPosition(position));
+                datos = ("B" + spinnerAzul.getItemAtPosition(position));
                 EnviarDatos(datos);
             }
 

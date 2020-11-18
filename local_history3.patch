@@ -1,0 +1,65 @@
+Index: app/src/main/java/com/example/control_bluetooth/MainActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/control_bluetooth/MainActivity.java	(date 1605660989649)
++++ app/src/main/java/com/example/control_bluetooth/MainActivity.java	(date 1605660989649)
+@@ -20,7 +20,7 @@
+ import java.io.OutputStream;
+ import java.util.UUID;
+ 
+-public class MainActivity extends AppCompatActivity {
++public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+ 
+     BluetoothSocket btSocket;
+     String ConexionBT = "NO CONECTADO";
+@@ -71,23 +71,6 @@
+             }
+         });
+ 
+-        //Botón Rojo para encender y apagar el color rojo del LED RGB
+-        btnRojo.setOnClickListener(new View.OnClickListener() {
+-            int ctrlEncendido = 0;
+-            @Override
+-            public void onClick(View view) {
+-                if (ctrlEncendido == 0) {
+-                    EnviarDatos("B255");
+-                    ctrlEncendido = 1;
+-
+-                }
+-                else if (ctrlEncendido == 1) {
+-                    EnviarDatos("B0");
+-                    ctrlEncendido = 0;
+-                }
+-            }
+-        });
+-
+         //Botón Verde para encender y apagar el color verde del LED RGB
+         btnVerde.setOnClickListener(new View.OnClickListener() {
+             int ctrlEncendido = 0;
+@@ -190,6 +173,24 @@
+         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+     }
+ 
++    @Override
++    public void onClick(View v) {
++        int ctrlEncendidoR = 0;
++        //Botón Rojo para encender y apagar el color rojo del LED RGB
++        if(v.getId() == findViewById(R.id.btn_Rojo).getId()){
++            if (ctrlEncendidoR == 0) {
++            EnviarDatos("R255");
++            ctrlEncendidoR = 1;
++
++            }
++            else {
++                EnviarDatos("R0");
++                ctrlEncendidoR = 0;
++            }
++        }
++
++    }
++
+     //Ejecución de Tarea Asincrona para conectar con el Bluetooth
+     private class ConectarBT extends AsyncTask <BluetoothDevice, Integer, BluetoothSocket> {
+ 
